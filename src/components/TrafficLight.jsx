@@ -3,13 +3,14 @@ import TrafficLightStates from '../models/TrafficLightStates';
 import useLightFSM from '../hooks/useLightFSM';
 
 export default function TrafficLight() {
+  // Use hook instead of putting the states and references in component
   const {
     current,
     secondsLeft,
     paused,
     togglePlayPause,
     reset
-  } = useLightFSM(TrafficLightStates, 'red', false)
+  } = useLightFSM(TrafficLightStates, 'red')
 
   const getColorStyle = (color) => ({
     width: 100,

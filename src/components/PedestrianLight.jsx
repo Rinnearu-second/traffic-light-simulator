@@ -10,34 +10,34 @@ export default function PedestrianLight() {
     paused,
     togglePlayPause,
     reset
-  } = useLightFSM(PedestrianLightStates, 'walk', false)
+  } = useLightFSM(PedestrianLightStates, 'walk')
 
   const renderIcon = () => {
     return (
-        <div style={{
+      <div style={{
             backgroundColor: '#222',
             padding: 30,
             borderRadius: 20,
             display: 'inline-block'
+      }}>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 20
         }}>
-            <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 20 // Optional: space between icons
-            }}>
-                <FaHandPaper
-                    size={100}
-                    color={current === 'stop' ? 'red' : '#444'}
-                    style={current === 'stop' ? { filter: 'drop-shadow(0 0 15px red)' } : {}}
-                />
-                <FaWalking
-                    size={100}
-                    color={current === 'walk' ? 'green' : '#444'}
-                    style={current === 'walk' ? { filter: 'drop-shadow(0 0 15px green)' } : {}}
-                />
-            </div>
+          <FaHandPaper
+            size={100}
+            color={current === 'stop' ? 'red' : '#444'}
+            style={current === 'stop' ? { filter: 'drop-shadow(0 0 15px red)' } : {}}
+          />
+          <FaWalking
+            size={100}
+            color={current === 'walk' ? 'green' : '#444'}
+            style={current === 'walk' ? { filter: 'drop-shadow(0 0 15px green)' } : {}}
+          />
         </div>
+      </div>
     )
   };
 

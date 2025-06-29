@@ -2,42 +2,51 @@ import { useState, useEffect, useRef } from 'react';
 
 export default function useLightFSM(states, initialState, initiallyPaused = true) {
   const [currentState, setCurrentState] = useState(initialState);
-  const [secondsLeft, setSecondsLeft] = useState(Math.ceil((states[initialState].duration - 10) / 1000));
+  const [secondsLeft, setSecondsLeft] = useState(Math.ceil((states[initialState].duration) / 1000));
 
   const [paused, setPaused] = useState(initiallyPaused);
 
-  const countdownRef = useRef(states[initialState].duration - 10);
-  const requestRef = useRef(null);
-  const lastTimestampRef = useRef(null);
+  const countdownRef = useRef(states[initialState].duration); // Actual remaining clock time
+  const requestRef = useRef(null); // For Animation Frame
+  const lastTimestampRef = useRef(null); // Record timestamp from previous tick
 
   const tick = (timestamp) => {
     if (!lastTimestampRef.current) lastTimestampRef.current = timestamp;
 
-    const deltaTime = timestamp - lastTimestampRef.current;
+    const deltaTime = timestamp - lastTimestampRef.current; // elapsed time from previous tick
     lastTimestampRef.current = timestamp;
 
     if (!paused) {
       countdownRef.current -= deltaTime
 
       if (countdownRef.current < 0) {
-        const nextState = states[currentState].next
-        setCurrentState(nextState)
-        countdownRef.current = states[nextState].duration
+        transitionTo(states[currentState].next)
       }
 
-      const newSeconds = Math.ceil(countdownRef.current / 1000);
-      if (newSeconds !== secondsLeft) {
-        setSecondsLeft(newSeconds);
-      }
+      updateCounter(countdownRef.current)
     }
 
     requestRef.current = requestAnimationFrame(tick);
   }
 
+  const updateCounter = (countdown) => {
+    const newSeconds = Math.ceil(countdown / 1000);
+    if (newSeconds !== secondsLeft) {
+      setSecondsLeft(newSeconds); 
+    }
+  }
+
+  const transitionTo = (next) => {
+    const nextState = next
+    setCurrentState(nextState)
+    countdownRef.current = states[nextState].duration
+  }
+
   useEffect(()=>{
       if (!paused) {
-        lastTimestampRef.current = performance.now();
         requestRef.current = requestAnimationFrame(tick);
+      } else {
+        lastTimestampRef.current = null;
       }
   
       return () => cancelAnimationFrame(requestRef.current);
@@ -45,11 +54,10 @@ export default function useLightFSM(states, initialState, initiallyPaused = true
 
   const togglePlayPause = () => setPaused(prev => !prev);
 
-  const handleReset = () => {
-    setPaused(initiallyPaused);
-    setCurrentState(initialState);
-    countdownRef.current = states[currentState].duration - 10;
-    setSecondsLeft(Math.ceil(countdownRef.current / 1000));
+  const handleReset = () => { // Back to initial state
+    setPaused(true);
+    transitionTo(initialState)
+    updateCounter(countdownRef.current)
   }
 
   return {
